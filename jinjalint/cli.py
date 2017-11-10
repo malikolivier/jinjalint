@@ -11,6 +11,8 @@ Options:
 
 The configuration file must be a valid Python file.
 """
+import sys
+
 from docopt import docopt
 
 from .lint import lint, resolve_file_paths
@@ -56,6 +58,8 @@ def main():
 
     issues = lint(paths, config)
     print_issues(issues, config)
+    if len(issues):
+        sys.exit(1)
 
 
 if __name__ == '__main__':

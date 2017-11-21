@@ -111,6 +111,8 @@ def check_indentation(file, config):
         )
         do_not_indent = part.tag.name in element_names_to_not_indent and \
             has_jinja_element_child(part.content, part.tag.name)
+        if part.begin.line != part.end.line:
+            inline = False
         shift = 0 if inline or do_not_indent else indent_size
         content_level = expected_level + shift
         if part.content is not None:
@@ -131,15 +133,16 @@ def check_indentation(file, config):
         opening_tag = element.opening_tag
         closing_tag = element.closing_tag
         check_opening_tag(expected_level, opening_tag, inline=inline)
-        if closing_tag:
-            if inline or opening_tag.end.line == closing_tag.begin.line:
-                check_content(expected_level, element.content, inline=True)
-            else:
-                check_content(
-                    expected_level + indent_size,
-                    element.content,
-                )
-                check_indent(expected_level, closing_tag)
+        if not closing_tag:
+            return
+        if inline or opening_tag.end.line == closing_tag.begin.line:
+            check_content(expected_level, element.content, inline=True)
+        else:
+            check_content(
+                expected_level + indent_size,
+                element.content,
+            )
+            check_indent(expected_level, closing_tag)
 
     def check_node(expected_level, node, inline=False):
         check_indent(expected_level, node, inline=inline)
